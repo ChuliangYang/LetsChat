@@ -1,4 +1,4 @@
-package com.me.cl.letschat
+package com.me.cl.letschat.base.component
 
 import android.support.v7.app.AppCompatActivity
 

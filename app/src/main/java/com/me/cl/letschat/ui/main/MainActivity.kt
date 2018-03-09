@@ -1,10 +1,12 @@
-package com.me.cl.letschat
+package com.me.cl.letschat.ui.main
 
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import com.me.cl.letschat.R
+import com.me.cl.letschat.base.component.BaseActivity
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(),MainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
