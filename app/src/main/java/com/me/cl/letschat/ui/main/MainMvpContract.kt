@@ -8,7 +8,9 @@ import com.me.cl.letschat.base.BaseView
  * Created by CL on 3/8/18.
  */
 interface MainView: BaseView{
-
+    fun showToast(message:String)
+    fun checkBleEnable(): Boolean
+    fun checkBlueToothEnable(): Boolean
 }
 interface MainPresenter: BasePresenter{
 
