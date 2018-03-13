@@ -12,6 +12,9 @@ import android.widget.TextView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.me.cl.letschat.R
+import com.me.cl.letschat.base.ClickDevicesItem
+import org.greenrobot.eventbus.EventBus
+import org.jetbrains.anko.sdk25.coroutines.onClick
 
 /**
  * Created by CL on 3/9/18.
@@ -61,6 +64,9 @@ class DiscoverDevicesAdapter(val context:Context?,bluetoothDevicesNullable:Mutab
             init {
                 itemView?.let {
                     ButterKnife.bind(this,it)
+                    it.onClick {
+                        EventBus.getDefault().postSticky(ClickDevicesItem(bluetoothDevices.get(adapterPosition),adapterPosition))
+                    }
                 }
             }
     }

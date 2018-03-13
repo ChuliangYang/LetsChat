@@ -1,10 +1,10 @@
-package com.me.cl.letschat.ui.main.base
+package com.me.cl.letschat.ui.client.base
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.me.cl.letschat.base.component.BaseActivity
-import com.me.cl.letschat.ui.main.MainActivity
+import com.me.cl.letschat.ui.client.ClientActivity
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -14,7 +14,7 @@ import dagger.Provides
  */
 @Component(modules= arrayOf(MainModule::class))
 interface MainComponent{
-    fun inject(mainActivity: MainActivity)
+    fun inject(mainActivity: ClientActivity)
 }
 
 
