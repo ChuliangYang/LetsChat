@@ -44,7 +44,7 @@ class ClientActivity : BaseActivity(), MainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_client)
         EventBus.getDefault().register(this)
         presenter.setView(this)
         presenter.handleInit()
