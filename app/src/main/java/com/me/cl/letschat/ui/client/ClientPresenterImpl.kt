@@ -2,27 +2,27 @@ package com.me.cl.letschat.ui.client
 
 import android.app.Activity
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Intent
 import com.me.cl.letschat.R
-import com.me.cl.letschat.base.ClickDevicesItem
-import com.me.cl.letschat.base.SCAN_PERIOD
-import com.me.cl.letschat.base.STATE_CONNECTED
-import com.me.cl.letschat.base.STATE_DISCONNECTED
-import com.me.cl.letschat.ui.client.base.MainInteractor
-import com.me.cl.letschat.ui.client.base.MainPresenter
-import com.me.cl.letschat.ui.client.base.MainView
+import com.me.cl.letschat.base.*
+import com.me.cl.letschat.ui.client.base.ClientInteractor
+import com.me.cl.letschat.ui.client.base.ClientPresenter
+import com.me.cl.letschat.ui.client.base.ClientView
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+
+
 /**
  * Created by CL on 3/8/18.
  */
-class ClientPresenterImpl @Inject constructor(var interactor: MainInteractor?): MainPresenter {
-    var mainView: MainView?=null
+class ClientPresenterImpl @Inject constructor(var interactor: ClientInteractor?): ClientPresenter {
+    var clientView: ClientView?=null
 
     override val disposables= CompositeDisposable()
 
@@ -35,7 +35,7 @@ class ClientPresenterImpl @Inject constructor(var interactor: MainInteractor?): 
 
     override fun handleResume(){
         notEnableRequest()
-        mainView?.run {
+        clientView?.run {
             initDeviceList()
             startDiscoverLimited()
         }
@@ -43,61 +43,83 @@ class ClientPresenterImpl @Inject constructor(var interactor: MainInteractor?): 
 
     override fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
         if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
-            mainView?.finishSelf()
+            clientView?.finishSelf()
         }
     }
 
     override fun handleDevicesClick(event: ClickDevicesItem){
         event.currentDevice?.let {
-            mainView?.connectToGattServer(it)
+            clientView?.connectToGattServer(it)
         }
     }
 
     override fun handleConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int){
         if (newState== BluetoothProfile.STATE_CONNECTED) {
-                mainView?.apply {
+                clientView?.apply {
                     maintainConnectState(STATE_CONNECTED)
                     discoverServices()
                 }
         }else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                mainView?.apply {
+                clientView?.apply {
                     maintainConnectState(STATE_DISCONNECTED)
                 }
         }
     }
 
-    private fun startDiscoverLimited(){
-        addDisposable(Single.timer(SCAN_PERIOD,TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
-            mainView?.stopDiscover()
-        })
-        mainView?.startDiscover()
-    }
+    override fun handleServicesDiscovered(gatt: BluetoothGatt, status: Int){
+        if (status == BluetoothGatt.GATT_SUCCESS){
+            interactor?.run {
 
-    private fun notEnableRequest() {
-        if (mainView?.checkBleEnable() != true) {
-            mainView?.requestEnableBlueTooth(REQUEST_ENABLE_BT)
+                val writeable = getWriteAbleCharacteristic(gatt)
+
+                clientView?.setCharacteristicNotification(gatt,getReadAbleCharacteristic(gatt),true)
+            }
         }
     }
 
-    override fun setView(view: MainView) {
-        mainView=view
+    override fun handleCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?){
+        if (CHARACTERISTIC_READABLE_UUID == characteristic?.uuid) {
+            val data = characteristic?.getStringValue(0)
+//            val value = Ints.fromByteArray(data)
+            // Update UI
+
+//            characteristic?.setValue("  ")
+//            gatt?.writeCharacteristic(characteristic)
+        }
+    }
+
+    private fun startDiscoverLimited(){
+        addDisposable(Single.timer(SCAN_PERIOD,TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
+            clientView?.stopDiscover()
+        })
+        clientView?.startDiscover()
+    }
+
+    private fun notEnableRequest() {
+        if (clientView?.checkBleEnable() != true) {
+            clientView?.requestEnableBlueTooth(REQUEST_ENABLE_BT)
+        }
+    }
+
+    override fun setView(view: ClientView) {
+        clientView=view
     }
 
 
     fun noBleFinish(){
-        if (mainView?.checkBleEnable() != true) {
+        if (clientView?.checkBleEnable() != true) {
             interactor?.run {
-                mainView?.showToast(getStringFromResource(R.string.ble_not_supported))
+                clientView?.showToast(getStringFromResource(R.string.ble_not_supported))
             }
-            mainView?.finishSelf()
+            clientView?.finishSelf()
         }
     }
     fun noBlueToothFinish(){
-        if (mainView?.checkBlueToothSupport() != true) {
+        if (clientView?.checkBlueToothSupport() != true) {
             interactor?.run {
-                mainView?.showToast(getStringFromResource(R.string.error_bluetooth_not_supported))
+                clientView?.showToast(getStringFromResource(R.string.error_bluetooth_not_supported))
             }
-            mainView?.finishSelf()
+            clientView?.finishSelf()
         }
     }
 }

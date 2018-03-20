@@ -7,6 +7,7 @@ import com.me.cl.letschat.ui.service.base.ServiceView
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
+
 /**
  * Created by CL on 3/13/18.
  */
@@ -27,9 +28,10 @@ class ServicePresenterImpl @Inject constructor(val interactor: ServiceInteractor
         createGattServer()
     }
 
+
     private fun createGattServer() {
         interactor?.run {
-            serviceView?.startGattServer(interactor.createService())
+            serviceView?.startGattServer(createService())
         }
     }
 

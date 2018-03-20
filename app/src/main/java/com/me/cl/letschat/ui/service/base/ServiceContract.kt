@@ -11,7 +11,6 @@ import com.me.cl.letschat.base.BaseView
  * Created by CL on 3/13/18.
  */
 interface ServiceView:BaseView{
-
     fun checkBleEnable(): Boolean
     fun showToast(message: String)
     fun checkBlueToothSupport(): Boolean
@@ -20,7 +19,6 @@ interface ServiceView:BaseView{
     fun startGattServer(service: BluetoothGattService?)
 }
 interface ServiceInteractor:BaseInteractor{
-
     fun getStringFromResource(resId: Int): String
     fun buildAdvertiseData(): AdvertiseData
     fun buildAdvertiseSettings(): AdvertiseSettings

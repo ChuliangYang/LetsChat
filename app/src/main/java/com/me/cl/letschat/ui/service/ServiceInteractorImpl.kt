@@ -8,8 +8,8 @@ import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
 import android.content.Context
 import android.os.ParcelUuid
-import com.me.cl.letschat.base.CHARACTERISTIC_COUNTER_UUID
-import com.me.cl.letschat.base.CHARACTERISTIC_INTERACTOR_UUID
+import com.me.cl.letschat.base.CHARACTERISTIC_READABLE_UUID
+import com.me.cl.letschat.base.CHARACTERISTIC_WRITEABLE_UUID
 import com.me.cl.letschat.base.SERVICE_UUID
 import com.me.cl.letschat.ui.service.base.ServiceInteractor
 import javax.inject.Inject
@@ -44,11 +44,11 @@ class ServiceInteractorImpl @Inject constructor(val context: Context?):ServiceIn
     override fun createService(): BluetoothGattService {
         return BluetoothGattService(SERVICE_UUID, SERVICE_TYPE_PRIMARY).apply {
             // Counter characteristic (read-only, supports subscriptions)
-            val counter = BluetoothGattCharacteristic(CHARACTERISTIC_COUNTER_UUID, PROPERTY_READ or PROPERTY_NOTIFY, PERMISSION_READ)
+            val readable = BluetoothGattCharacteristic(CHARACTERISTIC_READABLE_UUID, PROPERTY_READ or PROPERTY_NOTIFY, PERMISSION_READ)
             // Interactor characteristic
-            val interactor = BluetoothGattCharacteristic(CHARACTERISTIC_INTERACTOR_UUID, PROPERTY_WRITE_NO_RESPONSE, PERMISSION_WRITE)
-            addCharacteristic(counter)
-            addCharacteristic(interactor)
+            val writeable = BluetoothGattCharacteristic(CHARACTERISTIC_WRITEABLE_UUID, PROPERTY_WRITE_NO_RESPONSE, PERMISSION_WRITE)
+            addCharacteristic(readable)
+            addCharacteristic(writeable)
         }
     }
 }

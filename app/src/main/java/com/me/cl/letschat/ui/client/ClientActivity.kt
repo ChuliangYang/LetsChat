@@ -13,8 +13,8 @@ import com.me.cl.letschat.adapter.recyclerview.DiscoverDevicesAdapter
 import com.me.cl.letschat.base.ClickDevicesItem
 import com.me.cl.letschat.base.STATE_DISCONNECTED
 import com.me.cl.letschat.base.component.BaseActivity
-import com.me.cl.letschat.ui.client.base.MainPresenter
-import com.me.cl.letschat.ui.client.base.MainView
+import com.me.cl.letschat.ui.client.base.ClientPresenter
+import com.me.cl.letschat.ui.client.base.ClientView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -22,13 +22,13 @@ import javax.inject.Inject
 
 
 
-class ClientActivity : BaseActivity(), MainView {
+class ClientActivity : BaseActivity(), ClientView {
     //TODO:检查这句是否可以注入
     @Inject
     var mBluetoothAdapter: BluetoothAdapter?=null
 
     @Inject
-    lateinit var presenter: MainPresenter
+    lateinit var presenter: ClientPresenter
 
     @Inject
     lateinit var discoverDevicesAdapter: DiscoverDevicesAdapter
@@ -136,11 +136,15 @@ class ClientActivity : BaseActivity(), MainView {
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-
+                presenter.handleServicesDiscovered(gatt, status)
         }
 
         override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
 
+        }
+
+        override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
+                presenter.handleCharacteristicChanged(gatt, characteristic)
         }
     }
 
@@ -157,6 +161,10 @@ class ClientActivity : BaseActivity(), MainView {
         mBluetoothGatt?.discoverServices()
     }
 
-
+    override fun setCharacteristicNotification(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic?, enable: Boolean) {
+        characteristic?.let {
+            gatt.setCharacteristicNotification(it, enable)
+        }
+    }
 
 }
