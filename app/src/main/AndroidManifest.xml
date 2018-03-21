@@ -24,6 +24,7 @@
         </activity>
         <activity android:name=".ui.service.ServiceActivity" />
         <activity android:name=".ui.client.ClientActivity" />
+        <activity android:name="ChatActivity" />
     </application>
 
 </manifest>

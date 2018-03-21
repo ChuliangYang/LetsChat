@@ -5,4 +5,5 @@
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
     <string name="server">Server</string>
     <string name="client">Client</string>
+    <string name="send">send</string>
 </resources>
