@@ -4,10 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Intent
-import com.me.cl.letschat.base.BaseInteractor
-import com.me.cl.letschat.base.BasePresenter
-import com.me.cl.letschat.base.BaseView
-import com.me.cl.letschat.base.ClickDevicesItem
+import com.me.cl.letschat.base.*
 
 /**
  * Created by CL on 3/8/18.
@@ -26,6 +23,8 @@ interface ClientView: BaseView{
     fun maintainConnectState(state: Int)
     fun discoverServices()
     fun setCharacteristicNotification(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic?, enable: Boolean)
+    fun writeCharacteristic(characteristic: BluetoothGattCharacteristic?, message: String?): Boolean
+    fun startChatActivity()
 }
 interface ClientPresenter: BasePresenter<ClientView> {
     fun handleInit()
@@ -35,9 +34,14 @@ interface ClientPresenter: BasePresenter<ClientView> {
     fun handleConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int)
     fun handleServicesDiscovered(gatt: BluetoothGatt, status: Int)
     fun handleCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?)
+    fun handleSendMessage(event: SendMessageUseBle)
 }
 interface ClientInteractor: BaseInteractor{
     fun getStringFromResource(resId: Int): String
     fun getReadAbleCharacteristic(gatt: BluetoothGatt): BluetoothGattCharacteristic?
     fun getWriteAbleCharacteristic(gatt: BluetoothGatt): BluetoothGattCharacteristic?
+    fun saveToWeakCache(key: String?, value: Any?)
+    fun getFromWeakCache(key: String?): Any?
+    fun saveToStrongCache(key: String?, value: Any?)
+    fun getFromStrongCache(key: String?): Any?
 }

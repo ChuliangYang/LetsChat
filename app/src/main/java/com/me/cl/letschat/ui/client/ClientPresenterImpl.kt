@@ -7,12 +7,14 @@ import android.bluetooth.BluetoothProfile
 import android.content.Intent
 import com.me.cl.letschat.R
 import com.me.cl.letschat.base.*
+import com.me.cl.letschat.ui.client.ClientInteractorImpl.Companion.CACHE_WRITEABLE_CHARACTER
 import com.me.cl.letschat.ui.client.base.ClientInteractor
 import com.me.cl.letschat.ui.client.base.ClientPresenter
 import com.me.cl.letschat.ui.client.base.ClientView
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import org.greenrobot.eventbus.EventBus
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -69,23 +71,33 @@ class ClientPresenterImpl @Inject constructor(var interactor: ClientInteractor?)
     override fun handleServicesDiscovered(gatt: BluetoothGatt, status: Int){
         if (status == BluetoothGatt.GATT_SUCCESS){
             interactor?.run {
-
-                val writeable = getWriteAbleCharacteristic(gatt)
-
+                saveToStrongCache(CACHE_WRITEABLE_CHARACTER,getWriteAbleCharacteristic(gatt))
                 clientView?.setCharacteristicNotification(gatt,getReadAbleCharacteristic(gatt),true)
+                clientView?.startChatActivity()
             }
         }
     }
 
     override fun handleCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?){
         if (CHARACTERISTIC_READABLE_UUID == characteristic?.uuid) {
-            val data = characteristic?.getStringValue(0)
-//            val value = Ints.fromByteArray(data)
-            // Update UI
-
-//            characteristic?.setValue("  ")
-//            gatt?.writeCharacteristic(characteristic)
+            characteristic?.getStringValue(0)?.let {
+                EventBus.getDefault().postSticky(AddNewChat(DIRECTION_RECEIVE,it))
+            }
         }
+    }
+
+    override fun handleSendMessage(event:SendMessageUseBle){
+        if (event.fromWhere==FROM_CLIENT){
+            interactor?.run {
+                val characteristic=getFromStrongCache(CACHE_WRITEABLE_CHARACTER)
+                if(characteristic is BluetoothGattCharacteristic){
+                    if (clientView?.writeCharacteristic(characteristic,event.message)==true)
+                        EventBus.getDefault().postSticky(AddNewChat(DIRECTION_SEND,event.message))
+                }
+            }
+        }
+
+
     }
 
     private fun startDiscoverLimited(){

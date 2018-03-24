@@ -10,14 +10,15 @@ import android.view.MenuItem
 import butterknife.BindView
 import com.me.cl.letschat.R
 import com.me.cl.letschat.adapter.recyclerview.DiscoverDevicesAdapter
-import com.me.cl.letschat.base.ClickDevicesItem
-import com.me.cl.letschat.base.STATE_DISCONNECTED
+import com.me.cl.letschat.base.*
 import com.me.cl.letschat.base.component.BaseActivity
+import com.me.cl.letschat.ui.chat.ChatActivity
 import com.me.cl.letschat.ui.client.base.ClientPresenter
 import com.me.cl.letschat.ui.client.base.ClientView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.jetbrains.anko.startActivity
 import javax.inject.Inject
 
 
@@ -82,6 +83,13 @@ class ClientActivity : BaseActivity(), ClientView {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDevicesClick(event:ClickDevicesItem) {
         presenter.handleDevicesClick(event)
+        EventBus.getDefault().removeStickyEvent(event)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onSendMessage(event:SendMessageUseBle) {
+        presenter.handleSendMessage(event)
+        EventBus.getDefault().removeStickyEvent(event)
     }
 
     override fun showToast(message: String) {
@@ -165,6 +173,15 @@ class ClientActivity : BaseActivity(), ClientView {
         characteristic?.let {
             gatt.setCharacteristicNotification(it, enable)
         }
+    }
+
+    override fun writeCharacteristic(characteristic: BluetoothGattCharacteristic?,message: String?):Boolean{
+        characteristic?.setValue(message)
+        return mBluetoothGatt?.writeCharacteristic(characteristic)?:false
+    }
+
+    override fun startChatActivity(){
+        startActivity<ChatActivity>(INTENT_EXTRA_BLE_DIRECTION to FROM_CLIENT)
     }
 
 }

@@ -6,4 +6,5 @@
     <string name="server">Server</string>
     <string name="client">Client</string>
     <string name="send">send</string>
+    <string name="message_empty_warn">Please write some message.</string>
 </resources>

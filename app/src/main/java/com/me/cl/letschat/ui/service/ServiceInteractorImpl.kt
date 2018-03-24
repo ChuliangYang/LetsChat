@@ -12,6 +12,7 @@ import com.me.cl.letschat.base.CHARACTERISTIC_READABLE_UUID
 import com.me.cl.letschat.base.CHARACTERISTIC_WRITEABLE_UUID
 import com.me.cl.letschat.base.SERVICE_UUID
 import com.me.cl.letschat.ui.service.base.ServiceInteractor
+import java.util.*
 import javax.inject.Inject
 
 
@@ -19,6 +20,8 @@ import javax.inject.Inject
  * Created by CL on 3/13/18.
  */
 class ServiceInteractorImpl @Inject constructor(val context: Context?):ServiceInteractor {
+    val strongCache: HashMap<String, Any> = HashMap()
+
 
     override fun getStringFromResource(resId:Int):String{
         return context?.getString(resId)?:""
@@ -50,5 +53,22 @@ class ServiceInteractorImpl @Inject constructor(val context: Context?):ServiceIn
             addCharacteristic(readable)
             addCharacteristic(writeable)
         }
+    }
+
+    override fun saveReadableCharacteristic(bluetoothGattService: BluetoothGattService?):Boolean{
+        bluetoothGattService?.let {
+            strongCache.put(CACHE_READABLE_CHARACTER,it.getCharacteristic(CHARACTERISTIC_READABLE_UUID))
+            return true
+        }?:return false
+    }
+
+    override fun getFromCache(key:String?):Any?{
+        key?.let {
+            return strongCache.get(key)
+        }?:return null
+    }
+
+    companion object {
+        val CACHE_READABLE_CHARACTER="100"
     }
 }
