@@ -1,29 +1,38 @@
 package com.me.cl.letschat.ui.client.base
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
-import com.me.cl.letschat.base.component.BaseActivity
+import com.me.cl.letschat.adapter.recyclerview.DiscoverDevicesAdapter
 import com.me.cl.letschat.ui.client.ClientActivity
-import dagger.Component
+import com.me.cl.letschat.ui.client.ClientInteractorImpl
+import com.me.cl.letschat.ui.client.ClientPresenterImpl
 import dagger.Module
 import dagger.Provides
+import dagger.Subcomponent
 
 /**
  * Created by CL on 3/8/18.
  */
-@Component(modules= arrayOf(MainModule::class))
-interface MainComponent{
-    fun inject(mainActivity: ClientActivity)
+@Subcomponent(modules= arrayOf(ClientModule::class))
+interface ClientComponent{
+    fun inject(clientActivity: ClientActivity)
 }
 
 
 
 @Module
-class MainModule(var baseActivityNullable: BaseActivity?){
+class ClientModule(){
+    @Provides
+    fun provideClientPresenter(clientPresenterImpl: ClientPresenterImpl):ClientPresenter{
+        return clientPresenterImpl
+    }
 
     @Provides
-    fun provideBluetoothAdapter(): BluetoothAdapter?{
-        return (baseActivityNullable?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+    fun provideClientInteractor(clientInteractorImpl: ClientInteractorImpl):ClientInteractor{
+        return clientInteractorImpl
+    }
+
+    @Provides
+    fun provideDiscoverDevicesAdapter(context: Context?): DiscoverDevicesAdapter {
+        return DiscoverDevicesAdapter(context,null)
     }
 }

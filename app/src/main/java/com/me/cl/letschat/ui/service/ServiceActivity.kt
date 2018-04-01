@@ -7,11 +7,10 @@ import android.bluetooth.le.AdvertiseSettings
 import android.content.pm.PackageManager
 import android.os.Bundle
 import com.me.cl.letschat.R
-import com.me.cl.letschat.base.FROM_SERVER
-import com.me.cl.letschat.base.INTENT_EXTRA_BLE_DIRECTION
-import com.me.cl.letschat.base.SendMessageUseBle
+import com.me.cl.letschat.base.*
 import com.me.cl.letschat.base.component.BaseActivity
 import com.me.cl.letschat.ui.chat.ChatActivity
+import com.me.cl.letschat.ui.service.base.ServiceModule
 import com.me.cl.letschat.ui.service.base.ServicePresenter
 import com.me.cl.letschat.ui.service.base.ServiceView
 import org.greenrobot.eventbus.EventBus
@@ -20,6 +19,7 @@ import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.startActivity
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 
 /**
@@ -29,13 +29,15 @@ class ServiceActivity:BaseActivity(),ServiceView {
 
     //TODO:检查这句是否可以注入
     @Inject
-    var mBluetoothAdapter: BluetoothAdapter?=null
+    lateinit var mBluetoothAdapterProvider: Provider<BluetoothAdapter?>
 
     @Inject
     lateinit var presenter: ServicePresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DaggerBlueToothComponent.builder().blueToothActivityModule(BlueToothActivityModule(this)).build()
+                .plus(ServiceModule()).inject(this)
         setContentView(R.layout.activity_service)
         presenter.handleInit()
 
@@ -50,7 +52,7 @@ class ServiceActivity:BaseActivity(),ServiceView {
     }
 
     override fun checkBlueToothSupport():Boolean{
-        return mBluetoothAdapter != null
+        return mBluetoothAdapterProvider.get() != null
     }
 
     override fun finishSelf(){
@@ -68,12 +70,12 @@ class ServiceActivity:BaseActivity(),ServiceView {
     }
 
     override fun startAdvertise(settings: AdvertiseSettings,data: AdvertiseData){
-        mBluetoothAdapter?.bluetoothLeAdvertiser?.startAdvertising(settings, data, mAdvertiseCallback)
+        mBluetoothAdapterProvider.get()?.bluetoothLeAdvertiser?.startAdvertising(settings, data, mAdvertiseCallback)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onSendMessage(event: SendMessageUseBle) {
-        presenter.handleSendMessage(event)
+        presenter?.handleSendMessage(event)
         EventBus.getDefault().removeStickyEvent(event)
     }
     //todo 收到消息未处理

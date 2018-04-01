@@ -15,11 +15,12 @@ import com.me.cl.letschat.R
 import com.me.cl.letschat.base.ClickDevicesItem
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import javax.inject.Inject
 
 /**
  * Created by CL on 3/9/18.
  */
-class DiscoverDevicesAdapter(val context:Context?,bluetoothDevicesNullable:MutableList<BluetoothDevice>?):RecyclerView.Adapter<ViewHolder>() {
+class DiscoverDevicesAdapter @Inject constructor(val context:Context?,bluetoothDevicesNullable:MutableList<BluetoothDevice>?):RecyclerView.Adapter<ViewHolder>() {
 
     val bluetoothDevices:MutableList<BluetoothDevice> = bluetoothDevicesNullable?: mutableListOf()
 

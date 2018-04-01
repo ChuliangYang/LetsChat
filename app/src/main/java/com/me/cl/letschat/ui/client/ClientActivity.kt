@@ -13,6 +13,7 @@ import com.me.cl.letschat.adapter.recyclerview.DiscoverDevicesAdapter
 import com.me.cl.letschat.base.*
 import com.me.cl.letschat.base.component.BaseActivity
 import com.me.cl.letschat.ui.chat.ChatActivity
+import com.me.cl.letschat.ui.client.base.ClientModule
 import com.me.cl.letschat.ui.client.base.ClientPresenter
 import com.me.cl.letschat.ui.client.base.ClientView
 import org.greenrobot.eventbus.EventBus
@@ -20,13 +21,14 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.startActivity
 import javax.inject.Inject
-
+import javax.inject.Provider
 
 
 class ClientActivity : BaseActivity(), ClientView {
-    //TODO:检查这句是否可以注入
+
+    //可为空的参数注入,因为kotlin的dagger注入只支持非空类型，因此折中
     @Inject
-    var mBluetoothAdapter: BluetoothAdapter?=null
+    lateinit var mBluetoothAdapterProvider: Provider<BluetoothAdapter?>
 
     @Inject
     lateinit var presenter: ClientPresenter
@@ -45,6 +47,8 @@ class ClientActivity : BaseActivity(), ClientView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DaggerBlueToothComponent.builder().blueToothActivityModule(BlueToothActivityModule(this)).build()
+                .plus(ClientModule()).inject(this)
         setContentView(R.layout.activity_client)
         EventBus.getDefault().register(this)
         presenter.setView(this)
@@ -101,11 +105,11 @@ class ClientActivity : BaseActivity(), ClientView {
     }
 
     override fun checkBlueToothSupport():Boolean{
-       return mBluetoothAdapter != null
+       return mBluetoothAdapterProvider.get() != null
     }
 
     override fun checkBlueToothEnabled():Boolean{
-        return mBluetoothAdapter?.isEnabled == true
+        return mBluetoothAdapterProvider.get()?.isEnabled == true
     }
 
     override fun requestEnableBlueTooth(requestCode: Int){
@@ -126,12 +130,12 @@ class ClientActivity : BaseActivity(), ClientView {
 
     override fun startDiscover(){
         mScanning = true
-        mBluetoothAdapter?.startLeScan(mLeScanCallback)
+        mBluetoothAdapterProvider.get()?.startLeScan(mLeScanCallback)
     }
 
     override fun stopDiscover(){
         mScanning = false
-        mBluetoothAdapter?.stopLeScan(mLeScanCallback)
+        mBluetoothAdapterProvider.get()?.stopLeScan(mLeScanCallback)
     }
     override fun finishSelf(){
         finish()
