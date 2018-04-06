@@ -24,11 +24,11 @@ class ClientInteractorImpl @Inject constructor(val context: Context?): ClientInt
     }
 
     override fun getReadAbleCharacteristic(gatt: BluetoothGatt): BluetoothGattCharacteristic? {
-        return gatt.getService(SERVICE_UUID).getCharacteristic(CHARACTERISTIC_READABLE_UUID)
+        return gatt.getService(SERVICE_UUID)?.getCharacteristic(CHARACTERISTIC_READABLE_UUID)
     }
 
     override fun getWriteAbleCharacteristic(gatt: BluetoothGatt): BluetoothGattCharacteristic? {
-        return gatt.getService(SERVICE_UUID).getCharacteristic(CHARACTERISTIC_WRITEABLE_UUID)
+        return gatt.getService(SERVICE_UUID)?.getCharacteristic(CHARACTERISTIC_WRITEABLE_UUID)
     }
 
     override fun saveToWeakCache(key: String?, value:Any?){

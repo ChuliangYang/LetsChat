@@ -28,9 +28,9 @@ class MainActivityUI : AnkoComponent<MainActivity> {
 
                 button(R.string.server).lparams(width = wrapContent, height = wrapContent) {
                     bottomMargin = dip(50)
-                    onClick {
-                        startActivity<ServiceActivity>()
-                    }
+
+                }.onClick {
+                    startActivity<ServiceActivity>()
                 }
 
                 button(R.string.client).lparams(width = wrapContent, height = wrapContent)

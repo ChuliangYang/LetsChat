@@ -46,9 +46,12 @@ class DiscoverDevicesAdapter @Inject constructor(val context:Context?,bluetoothD
         }
     }
 
-    fun addNewDevice(bluetoothDevice: BluetoothDevice?){
+    fun addDevice(bluetoothDevice: BluetoothDevice?){
         bluetoothDevice?.let {
-            bluetoothDevices.add(it)
+            if(!bluetoothDevices.contains(bluetoothDevice)){
+                bluetoothDevices.add(it)
+                notifyDataSetChanged()
+            }
         }
     }
 

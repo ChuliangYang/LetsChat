@@ -25,6 +25,7 @@ interface ClientView: BaseView{
     fun setCharacteristicNotification(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic?, enable: Boolean)
     fun writeCharacteristic(characteristic: BluetoothGattCharacteristic?, message: String?): Boolean
     fun startChatActivity()
+    fun showTitleProgressBar(show: Boolean)
 }
 interface ClientPresenter: BasePresenter<ClientView> {
     fun handleInit()

@@ -11,6 +11,7 @@ import com.me.cl.letschat.ui.client.ClientInteractorImpl.Companion.CACHE_WRITEAB
 import com.me.cl.letschat.ui.client.base.ClientInteractor
 import com.me.cl.letschat.ui.client.base.ClientPresenter
 import com.me.cl.letschat.ui.client.base.ClientView
+import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -64,18 +65,35 @@ class ClientPresenterImpl @Inject constructor(var interactor: ClientInteractor?)
         }else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 clientView?.apply {
                     maintainConnectState(STATE_DISCONNECTED)
+                    showTitleProgressBar(false)
+                    Completable.create {  showToast("disconnected")}.subscribeOn(AndroidSchedulers.mainThread()).subscribe()
                 }
         }
     }
 
     override fun handleServicesDiscovered(gatt: BluetoothGatt, status: Int){
+        Completable.create {  clientView?.showTitleProgressBar(false) }.subscribeOn(AndroidSchedulers.mainThread()).subscribe()
+
+
         if (status == BluetoothGatt.GATT_SUCCESS){
             interactor?.run {
-                saveToStrongCache(CACHE_WRITEABLE_CHARACTER,getWriteAbleCharacteristic(gatt))
-                clientView?.setCharacteristicNotification(gatt,getReadAbleCharacteristic(gatt),true)
-                clientView?.startChatActivity()
+                val writable=getWriteAbleCharacteristic(gatt)
+                val readable=getReadAbleCharacteristic(gatt)
+                writable?.let {
+                    saveToStrongCache(CACHE_WRITEABLE_CHARACTER,it)
+                }
+                readable?.let {
+                    clientView?.setCharacteristicNotification(gatt,it,true)
+                }
+                if(writable!=null&&readable!=null){
+                    clientView?.startChatActivity()
+                    return
+                }
             }
         }
+            Completable.create {  clientView?.showToast("Can't create session") }.subscribeOn(AndroidSchedulers.mainThread()).subscribe()
+
+
     }
 
     override fun handleCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?){

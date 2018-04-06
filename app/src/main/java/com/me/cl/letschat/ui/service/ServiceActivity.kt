@@ -5,7 +5,11 @@ import android.bluetooth.le.AdvertiseCallback
 import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.widget.ProgressBar
+import butterknife.BindView
+import butterknife.ButterKnife
 import com.me.cl.letschat.R
 import com.me.cl.letschat.base.*
 import com.me.cl.letschat.base.component.BaseActivity
@@ -34,11 +38,16 @@ class ServiceActivity:BaseActivity(),ServiceView {
     @Inject
     lateinit var presenter: ServicePresenter
 
+    @BindView(R.id.progressBar)
+    lateinit var progressBar: ProgressBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DaggerBlueToothComponent.builder().blueToothActivityModule(BlueToothActivityModule(this)).build()
                 .plus(ServiceModule()).inject(this)
         setContentView(R.layout.activity_service)
+        ButterKnife.bind(this)
+        presenter.setView(this)
         presenter.handleInit()
 
     }
@@ -60,17 +69,21 @@ class ServiceActivity:BaseActivity(),ServiceView {
     }
 
      val mAdvertiseCallback = object : AdvertiseCallback() {
-        override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
-            Timber.d("LE Advertise Started.")
-        }
+            override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
+                Timber.d("LE Advertise Started.")
+            }
 
-        override fun onStartFailure(errorCode: Int) {
-            Timber.d("LE Advertise Failed: " + errorCode)
+            override fun onStartFailure(errorCode: Int) {
+                Timber.d("LE Advertise Failed: " + errorCode)
+            }
         }
-    }
 
     override fun startAdvertise(settings: AdvertiseSettings,data: AdvertiseData){
-        mBluetoothAdapterProvider.get()?.bluetoothLeAdvertiser?.startAdvertising(settings, data, mAdvertiseCallback)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            mBluetoothAdapterProvider.get()?.bluetoothLeAdvertiser?.startAdvertising(settings, data, mAdvertiseCallback)
+        }else{
+                finish()
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

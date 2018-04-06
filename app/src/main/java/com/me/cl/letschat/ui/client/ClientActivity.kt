@@ -4,10 +4,13 @@ import android.bluetooth.*
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ProgressBar
 import butterknife.BindView
+import butterknife.ButterKnife
 import com.me.cl.letschat.R
 import com.me.cl.letschat.adapter.recyclerview.DiscoverDevicesAdapter
 import com.me.cl.letschat.base.*
@@ -39,9 +42,13 @@ class ClientActivity : BaseActivity(), ClientView {
     @BindView(R.id.rv_devices)
     lateinit var deviceList:RecyclerView
 
+    @BindView(R.id.progressBar)
+    lateinit var progressBar:ProgressBar
+
     var mBluetoothGatt: BluetoothGatt?=null
 
      var mScanning: Boolean = false
+     var showProgress: Boolean = false
      var mConnectionState = STATE_DISCONNECTED
 
 
@@ -50,6 +57,7 @@ class ClientActivity : BaseActivity(), ClientView {
         DaggerBlueToothComponent.builder().blueToothActivityModule(BlueToothActivityModule(this)).build()
                 .plus(ClientModule()).inject(this)
         setContentView(R.layout.activity_client)
+        ButterKnife.bind(this)
         EventBus.getDefault().register(this)
         presenter.setView(this)
         presenter.handleInit()
@@ -71,7 +79,9 @@ class ClientActivity : BaseActivity(), ClientView {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.client_menu, menu)
+        menu?.findItem(R.id.menu_progress)?.isVisible = showProgress
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -97,7 +107,7 @@ class ClientActivity : BaseActivity(), ClientView {
     }
 
     override fun showToast(message: String) {
-         makeToast(message)
+        makeToast(message)
     }
 
     override fun checkBleEnable():Boolean{
@@ -118,23 +128,27 @@ class ClientActivity : BaseActivity(), ClientView {
 
     override fun initDeviceList(){
         deviceList.adapter=discoverDevicesAdapter
+        deviceList.layoutManager=LinearLayoutManager(this)
     }
 
     // Device scan callback.
     val mLeScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
         runOnUiThread {
-            discoverDevicesAdapter.addNewDevice(device)
-            discoverDevicesAdapter.notifyDataSetChanged()
+            //探索到的很多设备是重复的，要手动过滤掉
+            discoverDevicesAdapter.addDevice(device)
+//            discoverDevicesAdapter.notifyDataSetChanged()
         }
     }
 
     override fun startDiscover(){
         mScanning = true
+        showTitleProgressBar(mScanning)
         mBluetoothAdapterProvider.get()?.startLeScan(mLeScanCallback)
     }
 
     override fun stopDiscover(){
         mScanning = false
+        showTitleProgressBar(mScanning)
         mBluetoothAdapterProvider.get()?.stopLeScan(mLeScanCallback)
     }
     override fun finishSelf(){
@@ -162,6 +176,7 @@ class ClientActivity : BaseActivity(), ClientView {
 
 
     override fun connectToGattServer(device:BluetoothDevice?){
+        showTitleProgressBar(true)
         mBluetoothGatt = device?.connectGatt(this, false, mGattCallback)
     }
 
@@ -186,6 +201,11 @@ class ClientActivity : BaseActivity(), ClientView {
 
     override fun startChatActivity(){
         startActivity<ChatActivity>(INTENT_EXTRA_BLE_DIRECTION to FROM_CLIENT)
+    }
+
+    override fun showTitleProgressBar(show:Boolean){
+        showProgress=show
+        invalidateOptionsMenu()
     }
 
 }

@@ -16,8 +16,6 @@ import javax.inject.Scope
 /**
  * Created by CL on 3/8/18.
  */
-
-
 @Scope
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
 annotation class BlueToothActivityScope
