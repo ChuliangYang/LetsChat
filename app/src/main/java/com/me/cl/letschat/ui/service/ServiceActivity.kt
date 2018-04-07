@@ -31,7 +31,6 @@ import javax.inject.Provider
  */
 class ServiceActivity:BaseActivity(),ServiceView {
 
-    //TODO:检查这句是否可以注入
     @Inject
     lateinit var mBluetoothAdapterProvider: Provider<BluetoothAdapter?>
 
